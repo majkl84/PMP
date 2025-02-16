@@ -1,5 +1,5 @@
 from pymodbus.client import ModbusTcpClient
-from app import log_message
+from custom_components import log_message
 
 
 # Описание регистров
