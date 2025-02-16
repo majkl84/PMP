@@ -8,7 +8,7 @@
   "options": {},
   "schema": {},
   "ports": {
-    "80/tcp": 5000
+    "5000/tcp": 5000
   },
   "map": ["share"],
   "webui": "http://[::]:5000",
