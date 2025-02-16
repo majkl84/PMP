@@ -1,7 +1,7 @@
 import time
 import json
 from flask import Flask, render_template, request, jsonify
-from config import (MQTT_TOPICS, MODBUS_HOSTS)
+from config import (MQTT_TOPICS, MODBUS_HOSTS, SQLITE_DB, LOGGING_ENABLED, PREVIOUS_ENERGY)
 from database import initialize_database, execute_query
 from mqtt_handler import connect_mqtt, publish_mqtt, log_message
 from modbus_handler import *
@@ -10,7 +10,6 @@ from cleanup import cleanup_logs, cleanup_historical_data
 
 # Инициализация Flask
 app = Flask(__name__)
-
 
 # Функция для корректного вычитания с учетом переполнения
 def calculate_difference(new_value, old_value):
@@ -22,11 +21,9 @@ def calculate_difference(new_value, old_value):
         else:
             return (old_value - 65536) + new_value
 
-
 # Функция для получения текущего времени в формате UTC+3
 def get_current_time_utc_plus_3():
     return (datetime.now(timezone.utc) + timedelta(hours=3)).isoformat()
-
 
 # Сохранение сырых данных в SQLite
 def save_raw_data(data):
@@ -43,14 +40,12 @@ def save_raw_data(data):
             timestamp = excluded.timestamp
     """, (data.get("L1raw", 0), data.get("L2raw", 0), data.get("L3raw", 0), get_current_time_utc_plus_3()))
 
-
 # Сохранение исторических данных
 def save_historical_data(raw_data):
     execute_query("""
         INSERT INTO historical_data (L1history, L2history, L3history, timestamp)
         VALUES (?, ?, ?, ?)
     """, (raw_data["L1raw"], raw_data["L2raw"], raw_data["L3raw"], get_current_time_utc_plus_3()))
-
 
 # Обновление общих данных в SQLite
 def update_total_data(raw_data):
@@ -87,12 +82,12 @@ def update_total_data(raw_data):
         WHERE id = 1
     """, (L1Total, L2Total, L3Total, get_current_time_utc_plus_3()))
 
-
 # Обработка данных и публикация в MQTT
 def process_and_publish_data():
     global PREVIOUS_ENERGY
 
     while True:
+        full_data = {}
         raw_data = {"L1raw": 0, "L2raw": 0, "L3raw": 0}
 
         total_power = 0.0  # Инициализация переменной для общей мощности
@@ -118,6 +113,7 @@ def process_and_publish_data():
             }))
 
             diff_energy = calculate_difference(data["Energy"], PREVIOUS_ENERGY[phase])
+            full_data.update({f"{phase}_diff_Energy": diff_energy})
             # log_message(f"Energy difference for {phase}: {diff_energy} (new: {data['Energy']}, previous: {PREVIOUS_ENERGY[phase]})")
             PREVIOUS_ENERGY[phase] = data["Energy"]
 
@@ -139,8 +135,8 @@ def process_and_publish_data():
         cleanup_logs()
         # Публикация общей мощности в MQTT
         publish_mqtt(MQTT_TOPICS["General-W"], str(round(total_power, 2)))
-        time.sleep(10)
 
+        time.sleep(10)
 
 # Получение сырых данных из БД
 @app.route("/raw_data")
@@ -151,7 +147,6 @@ def get_raw_data():
         return jsonify(dict(zip(labels, row)))
     return jsonify({})
 
-
 # Получение общих данных из БД
 @app.route("/total_data")
 def get_total_data():
@@ -160,8 +155,6 @@ def get_total_data():
         labels = ['id', 'L1total', 'L2total', 'L3total', 'timestamp']
         return jsonify(dict(zip(labels, row)))
     return jsonify({})
-
-
 # Получение данных для каждой фазы
 @app.route("/data")
 def get_data():
@@ -172,13 +165,11 @@ def get_data():
             full_data[phase] = data
     return jsonify(full_data)
 
-
 # Получение логов из БД
 @app.route("/logs")
 def get_logs():
     rows = execute_query("SELECT * FROM logs ORDER BY timestamp DESC LIMIT 10")
     return jsonify([{"timestamp": row[0], "message": row[1]} for row in rows])
-
 
 # Переключение логирования
 @app.route("/toggle_logging", methods=["POST"])
@@ -188,7 +179,6 @@ def toggle_logging():
     log_message(f"Logging {'enabled' if LOGGING_ENABLED else 'disabled'}")
     return jsonify({"status": "success", "logging_enabled": LOGGING_ENABLED})
 
-
 # Очистка логов
 @app.route("/clear_logs", methods=["POST"])
 def clear_logs():
@@ -196,12 +186,10 @@ def clear_logs():
     log_message("Logs cleared")
     return jsonify({"status": "success", "message": "Журнал очищен"})
 
-
 # Главная страница
 @app.route("/")
 def index():
     return render_template("index.html")
-
 
 @app.route("/data_page", methods=["GET", "POST"])
 def data_page():
@@ -214,7 +202,6 @@ def data_page():
         elif 'dateStart' in data and 'dateStop' in data:
             return get_historical_data(data['dateStart'], data['dateStop'])
     return render_template("data_page.html")
-
 
 def get_historical_data(date_start, date_stop):
     print(f"Запрос исторических данных с {date_start} по {date_stop}")  # Логирование входящих данных
@@ -238,7 +225,6 @@ def get_historical_data(date_start, date_stop):
             "timestamp": row[4]
         })
     return jsonify(result) if result else jsonify({"error": "Нет данных для указанных временных рамок."})
-
 
 def check_data(id1, id2):
     if not id1 or not id2:
@@ -288,7 +274,6 @@ def check_data(id1, id2):
             "L3Difference": L3Difference
         }
     })
-
 
 # Запуск Flask приложения
 if __name__ == "__main__":
