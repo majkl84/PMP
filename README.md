@@ -5,20 +5,11 @@
 configuration.yaml
 # Настройки для вашего аддона
 ```
-pmp:
-  options:
-    mqtt_host: "mqtt://localhost"
-    mqtt_port: 1883
-    mqtt_user: ""
-    mqtt_password: ""
-    modbus_hosts:
-      L1:
-        host: ""
-        unit_id: 1
-      L2:
-        host: "
-        unit_id: 2
-      L3:
-        host: ""
-        unit_id: 3
+PMP:
+  environment:
+    MQTT_HOST: mqtt.shmv.su
+    MQTT_PORT: 1883
+    MQTT_USER: mqttvps
+    MQTT_PASSWORD: mqttvps
+    MODBUS_HOSTS: '{"host1": {"host": "10.0.6.84", "unit_id": 1}, "host2": {"host": "10.0.6.84", "unit_id": 2}, "host3": {"host": "10.0.6.84", "unit_id": 3}}'
 ```
