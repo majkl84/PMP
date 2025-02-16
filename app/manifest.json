@@ -1,10 +1,10 @@
 {
   "domain": "PMP",
   "name": "PMP",
-  "version": "1.0.0",
+  "version": "1.0.2",
   "documentation": "https://github.com/majkl84/PMP",
   "requirements": [],
   "dependencies": [],
-  "codeowners": ["@yourusername"],
+  "codeowners": ["@majkl84"],
   "iot_class": "cloud_push"
 }
