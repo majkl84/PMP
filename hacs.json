@@ -1,0 +1,12 @@
+{
+  "name": "PMP",
+  "repository": "your-github-username/your-addon",
+  "version": "1.0",
+  "slug": "PMP",
+  "description": "Панель мониторинга питанием для трех PZEM-016 220В 100А.",
+  "homepage": "https://github.com/majkl84/PMP",
+  "issue_tracker": "https://github.com/majkl84/PMP/issues",
+  "documentation": "https://github.com/majkl84/PMP#readme",
+  "changelog": "https://github.com/majkl84/PMP/blob/main/CHANGELOG.md",
+  "support": "https://github.com/majkl84/PMP/issues"
+}
