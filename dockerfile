@@ -1,13 +1,16 @@
-FROM python:3.12
+FROM python:3.12-alpine
 
 # Установка зависимостей
-COPY requirements.txt .
+RUN apk add --no-cache gcc musl-dev
+
+# Копирование вашего приложения в контейнер
+COPY app /usr/src/app
+
+# Установка рабочей директории
+WORKDIR /usr/src/app
+
+# Установка зависимостей из requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Копирование вашего кода
-COPY . /app
-
-WORKDIR /app
-
-# Запуск приложения
+# Команда для запуска вашего Flask приложения
 CMD ["python", "app.py"]
