@@ -16,14 +16,24 @@ map:
   - addons:rw
 
 options:
-  mqtt_host: "mqtt://localhost"  # Значение по умолчанию
+  mqtt_host: "mqtt://localhost"
   mqtt_port: 1883
   mqtt_user: ""
   mqtt_password: ""
-  sqlite_db: "your_database.db"
+  modbus_hosts:
+    L1:
+      host: "10.0.6.84"
+      unit_id: 1
+    L2:
+      host: "10.0.6.84"
+      unit_id: 2
+    L3:
+      host: "10.0.6.84"
+      unit_id: 3
 
 schema:
   mqtt_host: str
   mqtt_port: int
   mqtt_user: str
   mqtt_password: str
+  modbus_hosts: dict
