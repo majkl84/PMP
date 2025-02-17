@@ -7,8 +7,7 @@
   "ports": {
     "5000/tcp": 5000
   }, 
-  "version": "1.0.0", 
-  "icon": "/local/icon.png", 
+  "version": "1.0.0",
   "arch": [
     "armhf",
     "armv7",
