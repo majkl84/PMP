@@ -10,9 +10,6 @@ arch:
   - armv7
   - arm64
   - i386
-
-startup: application
-boot: auto
 ports:
   5000/tcp: 5000
 options:
