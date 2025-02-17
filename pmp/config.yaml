@@ -5,7 +5,12 @@ description: Панель мониторинга питанием для тре�
 icon: /local/icon.png
 startup: application
 boot: auto
-arch: [ amd64, aarch64, i386, armv7 ]
+arch:
+  - armhf
+  - armv7
+  - aarch64
+  - amd64
+  - i386
 ports:
   5000/tcp: 5000
 options:

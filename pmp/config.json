@@ -10,10 +10,11 @@
   "version": "1.0.0", 
   "icon": "/local/icon.png", 
   "arch": [
-    "amd64", 
-    "aarch64", 
-    "i386", 
-    "armv7"
+    "armhf",
+    "armv7",
+    "aarch64",
+    "amd64",
+    "i386"
   ], 
   "options": {
     "flask_port": 5000
