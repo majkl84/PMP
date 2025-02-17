@@ -2,7 +2,7 @@ name: PMP
 version: 1.0.0
 slug: pmp
 description: Панель мониторинга питанием для трех PZEM-016 220В 100А.
-icon: /local/icons/icon.png
+icon: /local/icon.png
 startup: application
 boot: auto
 arch:
