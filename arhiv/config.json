@@ -1,0 +1,27 @@
+{
+  "version": "1.0.2",
+  "slug": "PMP",
+  "name": "PMP",
+  "description": "Панель мониторинга питанием для трех PZEM-016 220В 100А.",
+  "startup": "services",
+  "boot": "auto",
+  "options": {},
+  "schema": {},
+  "ports": {
+    "5000/tcp": 5000
+  },
+  "map": ["share"],
+  "webui": "http://[::]:5000",
+  "arch": ["amd64", "armv7"],
+  "hassio_api": true,
+  "homeassistant": true,
+  "image": "pmp_addon",
+  "icon": "icon/icon.png",
+  "environment": {
+    "MQTT_HOST": "mqtt_broker_address",
+    "MQTT_PORT": "1883",
+    "MQTT_USER": "your_username",
+    "MQTT_PASSWORD": "your_password",
+    "MODBUS_HOSTS": "{\"host1\": {\"host\": \"192.168.1.10\", \"unit_id\": 1}, \"host2\": {\"host\": \"192.168.1.11\", \"unit_id\": 2}, \"host3\": {\"host\": \"192.168.1.12\", \"unit_id\": 3}}"
+  }
+}
