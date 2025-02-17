@@ -1,0 +1,21 @@
+name: PMP
+version: 1.0.0
+slug: pmp
+description: Панель мониторинга питанием для трех PZEM-016 220В 100А.
+icon: /local/icons/icon.png
+startup: application
+boot: auto
+arch:
+  - amd64
+  - armv7
+  - arm64
+  - i386
+
+startup: application
+boot: auto
+ports:
+  5000/tcp: 5000
+options:
+  flask_port: 5000
+schema:
+  flask_port: int
