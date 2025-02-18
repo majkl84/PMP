@@ -13,4 +13,5 @@ COPY app /usr/src/app
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Команда для запуска вашего Flask приложения
-CMD ["python", "app.py"]
+# CMD ["python", "app.py"]
+CMD ["./run.sh"]

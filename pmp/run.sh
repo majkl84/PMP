@@ -10,4 +10,5 @@ export MODBUS_UNIT_ID_L2="$MODBUS_UNIT_ID_L2"
 export MODBUS_HOST_L3="$MODBUS_HOST_L3"
 export MODBUS_UNIT_ID_L3="$MODBUS_UNIT_ID_L3"
 # Запуск приложения
-python /app/app/main.py --port=${FLASK_PORT:-5000}
+# python /app/app/app.py --port=${FLASK_PORT:-5000}
+python3 /usr/src/app/app.py --port=${FLASK_PORT}
