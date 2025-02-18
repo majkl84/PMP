@@ -3,11 +3,11 @@ FROM python:3.12-alpine
 # Установка зависимостей
 RUN apk add --no-cache gcc musl-dev
 
-# Копирование вашего приложения в контейнер
-COPY app /usr/src/app
-
 # Установка рабочей директории
 WORKDIR /usr/src/app
+
+# Копирование вашего приложения в контейнер
+COPY app /usr/src/app
 
 # Установка зависимостей из requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt

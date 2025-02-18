@@ -2,6 +2,7 @@ name: PMP
 version: 1.0.0
 slug: pmp
 description: Панель мониторинга питанием для трех PZEM-016 220В 100А.
+url: "https://github.com/majkl84/PMP/tree/main/pmp"
 startup: application
 boot: auto
 arch:
