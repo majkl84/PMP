@@ -1,10 +1,10 @@
 import os
 import json
 # Настройки MQTT
-MQTT_BROKER = os.environ.get("MQTT_HOST", "localhost")
-MQTT_PORT = int(os.environ.get("MQTT_PORT", 1883))
-MQTT_USERNAME = os.environ.get("MQTT_USER", "")
-MQTT_PASSWORD = os.environ.get("MQTT_PASSWORD", "")
+MQTT_BROKER = os.getenv("MQTT_BROKER", "")
+MQTT_PORT = int(os.getenv("MQTT_PORT", 1883))
+MQTT_USERNAME = os.getenv("MQTT_USERNAME", "")
+MQTT_PASSWORD = os.getenv("MQTT_PASSWORD", "")
 MQTT_TOPICS = {
     "full_kWh": "home/PM/full_kWh",
     "total_kWh": "home/PM/total_kWh",
@@ -16,11 +16,20 @@ MQTT_TOPICS = {
 }
 
 # Настройки Modbus
-modbus_hosts_env = os.environ.get("MODBUS_HOSTS")
-if modbus_hosts_env:
-    MODBUS_HOSTS = json.loads(modbus_hosts_env)
-else:
-    raise ValueError("Узлы Modbus не определены в конфигурации.")
+MODBUS_HOSTS = {
+    "L1": {
+        "host": os.getenv("MODBUS_HOST_L1", ""),
+        "unit_id": int(os.getenv("MODBUS_UNIT_ID_L1", 1))
+    },
+    "L2": {
+        "host": os.getenv("MODBUS_HOST_L2", ""),
+        "unit_id": int(os.getenv("MODBUS_UNIT_ID_L2", 2))
+    },
+    "L3": {
+        "host": os.getenv("MODBUS_HOST_L3", ""),
+        "unit_id": int(os.getenv("MODBUS_UNIT_ID_L3", 3))
+    }
+}
 
 # Описание регистров
 MODBUS_REGISTER_MAP = {

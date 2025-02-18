@@ -15,5 +15,41 @@ ports:
   5000/tcp: 5000
 options:
   flask_port: 5000
+  mqtt_broker: ""
+  mqtt_port: 1883
+  mqtt_username: ""
+  mqtt_password: ""
+  modbus_hosts:
+    L1:
+      host: ""
+      unit_id: 1
+    L2:
+      host: ""
+      unit_id: 2
+    L3:
+      host: ""
+      unit_id: 3
 schema:
   flask_port: int
+  mqtt_broker: str
+  mqtt_port: int
+  mqtt_username: str
+  mqtt_password: str
+  modbus_hosts:
+    type: dict
+    keys:
+      L1:
+        type: dict
+        keys:
+          host: str
+          unit_id: int
+      L2:
+        type: dict
+        keys:
+          host: str
+          unit_id: int
+      L3:
+        type: dict
+        keys:
+          host: str
+          unit_id: int
