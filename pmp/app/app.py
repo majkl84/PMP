@@ -2,7 +2,7 @@ import time
 import json
 from flask import Flask, render_template, request, jsonify
 from config import (MQTT_TOPICS, MODBUS_HOSTS, SQLITE_DB, LOGGING_ENABLED, PREVIOUS_ENERGY)
-from database import initialize_database, execute_query
+from database import initialize_database, execute_query, get_logging_state, set_logging_state
 from mqtt_handler import connect_mqtt, publish_mqtt, log_message
 from modbus_handler import *
 from datetime import datetime, timezone, timedelta  # Импортируем необходимые классы
@@ -168,22 +168,36 @@ def get_data():
 # Получение логов из БД
 @app.route("/logs")
 def get_logs():
-    rows = execute_query("SELECT * FROM logs ORDER BY timestamp DESC LIMIT 10")
+    if not get_logging_state():  # Проверяем состояние логирования
+        return jsonify([])  # Если логирование отключено, возвращаем пустой массив
+
+    limit = request.args.get('limit', default=10, type=int)  # Получаем параметр limit
+    rows = execute_query(f"SELECT * FROM logs ORDER BY timestamp DESC LIMIT {limit}")
     return jsonify([{"timestamp": row[0], "message": row[1]} for row in rows])
 
 # Переключение логирования
-@app.route("/toggle_logging", methods=["POST"])
+@app.route('/toggle_logging', methods=['POST'])
 def toggle_logging():
-    global LOGGING_ENABLED
-    LOGGING_ENABLED = not LOGGING_ENABLED
-    log_message(f"Logging {'enabled' if LOGGING_ENABLED else 'disabled'}")
-    return jsonify({"status": "success", "logging_enabled": LOGGING_ENABLED})
+    current_state = get_logging_state()
+    new_state = not current_state
 
+    set_logging_state(new_state)
+
+    # Логируем событие
+    message = 'Логирование включено' if new_state else 'Логирование отключено'
+    execute_query("INSERT INTO logs (message) VALUES (?)", (message,))
+
+    return jsonify({'logging_enabled': new_state})
+@app.route('/get_logging_state', methods=['GET'])
+def get_logging_state_route():
+    state = get_logging_state()
+    return jsonify({'logging_enabled': state})
 # Очистка логов
 @app.route("/clear_logs", methods=["POST"])
 def clear_logs():
     execute_query("DELETE FROM logs")
-    log_message("Logs cleared")
+    log_message("Logs cleared")  # Убедитесь, что функция log_message также записывает в базу данных
+    execute_query("INSERT INTO logs (message) VALUES (?)", ("Журнал очищен",))
     return jsonify({"status": "success", "message": "Журнал очищен"})
 
 # Главная страница

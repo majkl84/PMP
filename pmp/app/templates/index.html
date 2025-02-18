@@ -68,7 +68,16 @@
     <div class="row mt-4">
         <div class="col-md-12">
             <div class="card">
-                <div class="card-header bg-dark text-light">Журнал событий</div>
+                <div class="card-header bg-dark text-light d-flex justify-content-between align-items-center">
+                    <span>Журнал событий</span>
+                    <div class="d-flex align-items-center">
+                        <div class="form-check form-switch me-2">
+                            <input class="form-check-input" type="checkbox" id="toggleLogging">
+                            <label class="form-check-label" for="toggleLogging">Логирование</label>
+                        </div>
+                        <input type="number" id="logLimit" class="form-control" value="10" min="1" style="width: 60px;">
+                    </div>
+                </div>
                 <div class="card-body" id="logs">
                     <p class="text-muted">Загрузка журналов...</p>
                 </div>
@@ -78,7 +87,6 @@
 
     <div class="row mt-4">
         <div class="col-md-12 text-center">
-            <button id="toggleLogging" class="btn btn-primary me-2">Вкл/Выкл логирование</button>
             <button id="clearLogs" class="btn btn-danger">Очистить журнал</button>
         </div>
     </div>
@@ -124,7 +132,18 @@
         logs.forEach(log => {
             output += `<div class="log-entry"><strong>[${log.timestamp}]</strong> ${log.message}</div>`;
         });
+
+        // Обновляем содержимое и проверяем количество записей
         $('#logs').html(output || '<p class="text-muted">Журнал пуст</p>');
+
+        // Проверяем, нужно ли добавлять прокрутку
+        if (logs.length > 20) {
+            $('#logs').css('max-height', '800px'); // Устанавливаем высоту для прокрутки
+            $('#logs').css('overflow-y', 'auto');  // Включаем прокрутку
+        } else {
+            $('#logs').css('max-height', 'none');  // Убираем ограничение по высоте
+            $('#logs').css('overflow-y', 'visible'); // Убираем прокрутку
+        }
     }
 
     // Автоматическое обновление данных каждые 5 секунд
@@ -136,37 +155,72 @@
 
     // Автоматическое обновление логов каждые 10 секунд
     setInterval(() => {
-        $.getJSON('/logs', function (logs) {
-            updateLogs(logs);
-        });
+        loadLogs($('#logLimit').val()); // Загружаем логи с текущим значением LIMIT
     }, 10000);
 
     // Начальное обновление данных и логов при загрузке страницы
     $(document).ready(function () {
+        // Получение состояния логирования
+        $.getJSON('/get_logging_state', function (response) {
+            $('#toggleLogging').prop('checked', response.logging_enabled);
+            $('#toggleLogging').text(response.logging_enabled ? 'Отключить логирование' : 'Включить логирование');
+
+            // Загружаем логи только если логирование включено
+            if (response.logging_enabled) {
+                const savedLimit = localStorage.getItem('logLimit') || 10; // Загружаем сохраненное значение или 10 по умолчанию
+                $('#logLimit').val(savedLimit); // Устанавливаем значение в поле ввода
+                loadLogs(savedLimit);
+            } else {
+                $('#logs').html('<p class="text-muted">Логирование отключено</p>');
+            }
+        });
+
+        // Загрузка данных
         $.getJSON('/data', function (data) {
             updateData(data);
         });
 
-        $.getJSON('/logs', function (logs) {
-            updateLogs(logs);
+        // Обновление логов при изменении значения limit
+        $('#logLimit').change(function () {
+            const limit = $(this).val();
+            localStorage.setItem('logLimit', limit); // Сохраняем значение LIMIT
+            if ($('#toggleLogging').is(':checked')) {
+                loadLogs(limit);
+            }
         });
     });
 
     // Переключение логирования
-    $('#toggleLogging').click(function () {
+    $('#toggleLogging').change(function () {
+        const loggingEnabled = $(this).is(':checked');
         $.post('/toggle_logging', function (response) {
             alert(`Логирование сейчас ${response.logging_enabled ? 'включено' : 'отключено'}`);
-            $(this).text(response.logging_enabled ? 'Отключить логирование' : 'Включить логирование');
+            if (response.logging_enabled) {
+                loadLogs($('#logLimit').val());
+            } else {
+                $('#logs').html('<p class="text-muted">Логирование отключено</p>');
+            }
         });
     });
 
     // Очистка логов
     $('#clearLogs').click(function () {
-        $.post('/clear_logs', function (response) {
-            alert(response.message);
-            updateLogs([]);
-        });
+        $.post('/clear_logs')
+            .done(function (response) {
+                alert(response.message);
+                updateLogs([]);
+                $('#logs').html('<p class="text-muted">Журнал пуст</p>');
+            })
+            .fail(function () {
+                alert('Ошибка при очистке журнала. Попробуйте снова.');
+            });
     });
+
+    function loadLogs(limit) {
+        $.getJSON(`/logs?limit=${limit}`, function (logs) {
+            updateLogs(logs);
+        });
+    }
 </script>
 </body>
 </html>
