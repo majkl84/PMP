@@ -7,7 +7,7 @@ RUN apk add --no-cache gcc musl-dev
 WORKDIR /usr/src/app
 
 # Копирование вашего приложения в контейнер
-COPY app /usr/src/app
+COPY rootfs /usr/src/app
 
 # Установка зависимостей из requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
